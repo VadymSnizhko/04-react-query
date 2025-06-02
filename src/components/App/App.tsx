@@ -49,11 +49,11 @@ function App() {
         toast.error('No movies found for your request.')
       )}
 
-      {!isLoading && !isError && data?.results.length > 0 && (
+      {!isLoading && !isError && data && data?.results.length > 0 && (
         
         <>
 
-          {data.total_pages > 1 && (
+          {data && data.total_pages > 1 && (
             <ReactPaginate
               pageCount={data.total_pages}
               pageRangeDisplayed={5}
