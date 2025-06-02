@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useEffect } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import ReactPaginate from 'react-paginate';
 import SearchBar from '../SearchBar/SearchBar';
@@ -34,6 +35,11 @@ function App() {
     setSelectedMovie(null);
   };
 
+  useEffect(() => {
+    if (!isLoading && !isError && data?.results.length === 0 && query) {
+      toast.error('No movies found for your request.');
+    }
+  }, [isLoading, isError, data, query]);
   
   return (
     <div className={css.app}>
@@ -44,10 +50,6 @@ function App() {
 
       {isLoading && <Loader />}
       {isError && <ErrorMessage />}
-
-      {!isLoading && !isError && data?.results.length === 0 && query && (
-        toast.error('No movies found for your request.')
-      )}
 
       {!isLoading && !isError && data && data?.results.length > 0 && (
         
@@ -69,7 +71,6 @@ function App() {
           <MovieGrid movies={data.results} onSelect={handleSelectMovie} />
         </>
       )}
-
       {selectedMovie && (
         <MovieModal movie={selectedMovie} onClose={handleCloseModal} />
       )}
