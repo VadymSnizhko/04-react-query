@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import toast, { Toaster } from 'react-hot-toast';
 import ReactPaginate from 'react-paginate';
 import SearchBar from '../SearchBar/SearchBar';
 import MovieGrid from '../MovieGrid/MovieGrid';
+import { fetchMovies } from '../../services/movieService';
 import Loader from '../Loader/Loader';
 import ErrorMessage from '../ErrorMessage/ErrorMessage';
 import MovieModal from '../MovieModal/MovieModal';
 import {type Movie } from '../../types/movie';
-import useMovies from './useMovies';
 import css from './App.module.css';
 
 function App() {
@@ -16,7 +17,17 @@ function App() {
   const [page, setPage] = useState(1);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
-  const { data, isLoading, isError } = useMovies(query, page);
+  const {
+    data,
+    isLoading,
+    isError,
+    isSuccess,
+  } = useQuery({
+    queryKey: ['movies', query, page],
+    queryFn: () => fetchMovies(query, page),
+    enabled: !!query,
+    placeholderData: (prev) => prev,
+  });
 
   const handleSearch = (newQuery: string) => {
     if (!newQuery.trim()) {
@@ -36,10 +47,10 @@ function App() {
   };
 
   useEffect(() => {
-    if (!isLoading && !isError && data?.results.length === 0 && query) {
+    if (isSuccess && !isLoading && !isError && data?.results?.length === 0 && query){
       toast.error('No movies found for your request.');
     }
-  }, [isLoading, isError, data, query]);
+  }, [isSuccess, isLoading, isError, data, query]);
   
   return (
     <div className={css.app}>
@@ -55,7 +66,7 @@ function App() {
         
         <>
 
-          {data && data.total_pages > 1 && data.results.length > 0 && (
+          {data.total_pages > 1 && data.results.length > 0 && (
             <ReactPaginate
               pageCount={data.total_pages}
               pageRangeDisplayed={5}
@@ -71,6 +82,8 @@ function App() {
           <MovieGrid movies={data.results} onSelect={handleSelectMovie} />
         </>
       )}
+
+
       {selectedMovie && (
         <MovieModal movie={selectedMovie} onClose={handleCloseModal} />
       )}
