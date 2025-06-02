@@ -53,7 +53,7 @@ function App() {
         
         <>
 
-          {data && data.total_pages > 1 && (
+          {data && data.total_pages > 1 && data.results.length > 0 && (
             <ReactPaginate
               pageCount={data.total_pages}
               pageRangeDisplayed={5}
